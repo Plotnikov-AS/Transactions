@@ -1,10 +1,10 @@
 import java.util.HashMap;
 import java.util.Random;
 
-public class Bank
-{
-    private HashMap<String, Account> accounts;
+public class Bank{
+    private HashMap<String, Account> accounts = new HashMap<>();
     private final Random random = new Random();
+    private boolean transferSuccess;
 
     public synchronized boolean isFraud(String fromAccountNum, String toAccountNum, long amount)
         throws InterruptedException
@@ -22,11 +22,15 @@ public class Bank
      */
     public void transfer(String fromAccountNum, String toAccountNum, long amount)
     {
+        transferSuccess = false;
         Account from = accounts.get(fromAccountNum);
         Account to = accounts.get(toAccountNum);
-        from.withdraw(from.getBalance() - amount);
-        to.replenish(to.getBalance() + amount);
-        if (amount > 50000){
+
+        if (from.withdraw(amount)) {
+            to.replenish(amount);
+            transferSuccess = true;
+        }
+        if (amount > 50000 && transferSuccess){
             try {
                 if(isFraud(fromAccountNum, toAccountNum, amount)){
                     from.blockAccount();
@@ -44,5 +48,16 @@ public class Bank
     public long getBalance(String accountNum)
     {
         return accounts.get(accountNum).getBalance();
+    }
+
+    public HashMap<String, Account> getAccounts() {
+        return accounts;
+    }
+
+    public void generateAccounts(int quantity){
+        for (int i = 0; i < quantity; i++){
+            Account account = new Account(Integer.toString(i));
+            accounts.put(account.getAccNumber(), account);
+        }
     }
 }
