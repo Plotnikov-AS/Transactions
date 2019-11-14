@@ -5,11 +5,19 @@ public class Bank{
     private HashMap<String, Account> accounts = new HashMap<>();
     private final Random random = new Random();
     private boolean transferSuccess;
+    private final int AMOUNT_FRAUD_THRESHOLD = 50_000;
 
     public synchronized boolean isFraud(String fromAccountNum, String toAccountNum, long amount)
         throws InterruptedException
     {
+        accounts.get(fromAccountNum).setOnFraudChecking(true);
+        accounts.get(toAccountNum).setOnFraudChecking(true);
+
         Thread.sleep(1000);
+
+        accounts.get(fromAccountNum).setOnFraudChecking(false);
+        accounts.get(toAccountNum).setOnFraudChecking(false);
+
         return random.nextBoolean();
     }
 
@@ -30,7 +38,7 @@ public class Bank{
             to.replenish(amount);
             transferSuccess = true;
         }
-        if (amount > 50000 && transferSuccess){
+        if (amount > AMOUNT_FRAUD_THRESHOLD && transferSuccess){
             try {
                 if(isFraud(fromAccountNum, toAccountNum, amount)){
                     from.blockAccount();

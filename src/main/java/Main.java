@@ -16,9 +16,11 @@ public class Main{
         splittedAccounts = splitAccountsByThreads(accounts);
 
         for (int threadIndex = 0; threadIndex < THREADS_QUANTITY; threadIndex++){
-            bankManager = new BankManager(splittedAccounts.get(threadIndex));
+            bankManager = new BankManager(splittedAccounts.get(0), bank);
             new Thread(bankManager).start();
         }
+
+        bankManager.runTestFraud();
     }
 
     private static void initializeBank(int accountsQuantity){
@@ -47,31 +49,6 @@ public class Main{
         }
         return splittedAccounts;
     }
-
-
-private static class BankManager implements Runnable{
-    private String[] accounts;
-
-    BankManager(String[] accounts){
-            this.accounts = accounts;
-    }
-
-    @Override
-    public void run() {
-        for (String from : accounts) {
-            String to = Integer.toString((int) (Math.random() * accounts.length)); // Случайный номер номер счета из имеющихся
-            if (!from.equals(to)) {
-                long amount = getRandomAmount(1000, 150_000);
-                bank.transfer(from, to, amount);
-            }
-        }
-    }
-
-    private static long getRandomAmount(long min, long max){
-        max -= min;
-        return (long) (Math.random() * ++max) + min;
-    }
-}
 }
 
 
